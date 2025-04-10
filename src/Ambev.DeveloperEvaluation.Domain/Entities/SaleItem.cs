@@ -9,53 +9,33 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities;
 /// </summary>
 public class SaleItem : BaseEntity
 {
-    /// <summary>
-    /// Gets the identifier of the sale this item belongs to.
-    /// </summary>
-    public Guid SaleId { get; set; }
+    public Guid ProductId { get;  private set; } = Guid.Empty;
 
-    /// <summary>
-    /// Gets or sets the sale this item belongs to.
-    /// </summary>
-    public Sale? Sale { get; set; }
+    public string ProductName { get; private set; }
 
-    /// <summary>
-    /// Gets the identifier of the product being sold.
-    /// </summary>
-    public Guid ProductId { get; set; }
+    public int Quantity { get; private set; }
 
-    /// <summary>
-    /// Gets or sets the quantity of the product.
-    /// </summary>
-    public int Quantity { get; set; }
+    public decimal UnitPrice { get; private set; }
 
-    /// <summary>
-    /// Gets or sets the unit price of the product.
-    /// </summary>
-    public decimal UnitPrice { get; set; }
+    public bool IsCancelled { get; private set; }
 
-    /// <summary>
-    /// Gets or sets the discount applied to this item.
-    /// </summary>
-    public decimal Discount { get; set; }
+    public decimal GrossTotal => UnitPrice * Quantity;
 
-    /// <summary>
-    /// Gets the calculated total for the item, after discount.
-    /// </summary>
-    public decimal Total => Math.Round((UnitPrice * Quantity) - Discount, 2);
+    public decimal Discount => CalculateDiscount();
 
-    /// <summary>
-    /// Initializes a new instance of the SaleItem class.
-    /// </summary>
-    public SaleItem()
+    public decimal TotalItemAmount => GrossTotal - Discount;
+
+    public SaleItem(Guid productId, string productName, int quantity, decimal unitPrice)
     {
+        ProductId = productId;
+        ProductName = productName;
+        Quantity = quantity;
+        UnitPrice = unitPrice;
 
+        Validate();
     }
 
-    /// <summary>
-    /// Validates the business rules of the SaleItem entity.
-    /// </summary>
-    /// <returns>True if the item is valid; otherwise, false.</returns>
+
     public ValidationResultDetail Validate()
     {
         var validator = new SaleItemValidator();
@@ -65,5 +45,16 @@ public class SaleItem : BaseEntity
             IsValid = result.IsValid,
             Errors = result.Errors.Select(e => (ValidationErrorDetail)e)
         };
+    }
+
+    private decimal CalculateDiscount()
+    {
+        if (Quantity >= 10)
+            return UnitPrice * Quantity * 0.20m;
+
+        if (Quantity >= 4)
+            return UnitPrice * Quantity * 0.10m;
+
+        return 0;
     }
 }

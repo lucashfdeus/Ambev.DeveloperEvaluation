@@ -6,9 +6,9 @@
     public enum SaleStatus
     {
         /// <summary>
-        /// The sale is open and can be modified.
+        /// The sale has been created and can be modified.
         /// </summary>
-        Pending = 1,
+        Created = 1,
 
         /// <summary>
         /// The sale has been finalized and can no longer be changed.

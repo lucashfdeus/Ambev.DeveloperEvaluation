@@ -8,10 +8,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
         public SaleItemValidator()
         {
             RuleFor(x => x.ProductId)
-           .NotEmpty().WithMessage("ProductId must not be empty.");
+               .NotEmpty().WithMessage("ProductId must not be empty.");
 
             RuleFor(x => x.Quantity)
-                .GreaterThan(0).WithMessage("Quantity must be greater than zero.");
+                .GreaterThan(0).WithMessage("Quantity must be at least 1.")
+                .LessThanOrEqualTo(20).WithMessage("Maximum quantity is 20.");
 
             RuleFor(x => x.UnitPrice)
                 .GreaterThan(0).WithMessage("UnitPrice must be greater than zero.");
@@ -19,8 +20,13 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
             RuleFor(x => x.Discount)
                 .GreaterThanOrEqualTo(0).WithMessage("Discount cannot be negative.");
 
-            RuleFor(x => x)
+
+            RuleFor(saleItem => saleItem)
                 .Must(item => item.Discount <= item.UnitPrice * item.Quantity)
+                .WithMessage("Discount cannot be greater than the total value of the item.");
+
+            RuleFor(saleItem => saleItem)
+                .Must(item => item.Discount <= item.GrossTotal)
                 .WithMessage("Discount cannot be greater than the total value of the item.");
         }
     }

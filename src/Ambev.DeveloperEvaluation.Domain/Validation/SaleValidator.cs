@@ -7,11 +7,34 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
     {
         public SaleValidator()
         {
+            RuleFor(x => x.SaleNumber)
+                .NotEmpty().WithMessage("SaleNumber must not be empty.");
+
             RuleFor(x => x.CustomerId)
-            .NotEmpty().WithMessage("CustomerId must not be empty.");
+                .NotEmpty().WithMessage("CustomerExternalId must not be empty.");
+
+            RuleFor(x => x.CustomerName)
+                .NotEmpty().WithMessage("CustomerName must not be empty.");
 
             RuleFor(x => x.BranchId)
-                .NotEmpty().WithMessage("BranchId must not be empty.");
+                .NotEmpty().WithMessage("BranchExternalId must not be empty.");
+
+            RuleFor(x => x.BranchName)
+                .NotEmpty().WithMessage("BranchName must not be empty.");
+
+            RuleFor(x => x.SaleDate)
+                .NotEmpty().WithMessage("SaleDate must not be empty.")
+                .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Sale date cannot be in the future.");
+
+            RuleFor(x => x.CreatedAt)
+                .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("CreatedAt cannot be in the future.");
+
+            RuleFor(x => x.UpdatedAt)
+                .GreaterThanOrEqualTo(x => x.CreatedAt)
+                .WithMessage("UpdatedAt must be greater than or equal to CreatedAt.");
+
+            RuleFor(x => x.Status)
+                .IsInEnum().WithMessage("Status must be a valid value.");
 
             RuleFor(x => x.Items)
                 .NotNull().WithMessage("Items cannot be null.")
@@ -20,18 +43,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
             RuleForEach(x => x.Items)
                 .SetValidator(new SaleItemValidator());
 
-            RuleFor(x => x.Total)
+            RuleFor(x => x.TotalAmount)
                 .GreaterThan(0).WithMessage("Total must be greater than zero.");
-
-            RuleFor(x => x.Discount)
-                .GreaterThanOrEqualTo(0).WithMessage("Discount cannot be negative.");
-
-            RuleFor(x => x)
-                .Must(sale => sale.Total >= sale.Discount)
-                .WithMessage("Total must be greater than or equal to Discount.");
-
-            RuleFor(x => x.SaleDate)
-                .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Sale date cannot be in the future.");
         }
     }
 }

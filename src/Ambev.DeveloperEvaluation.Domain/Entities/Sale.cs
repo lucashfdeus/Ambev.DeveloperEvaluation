@@ -25,7 +25,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public List<SaleItem> Items { get; set; } = [];
 
-        public decimal TotalAmount => Items.Sum(i => i.TotalItemAmount);
+        public decimal NetTotalAmount => Items?.Where(i => !i.IsCancelled)
+                                               .Sum(i => i.TotalItemAmount) ?? 0;
+
+        public decimal GrossTotalAmount => Items?.Sum(i => i.GrossTotal) ?? 0;
 
         public SaleStatus Status { get; set; }
 

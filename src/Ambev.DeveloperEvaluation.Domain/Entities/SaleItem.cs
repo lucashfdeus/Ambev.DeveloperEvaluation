@@ -7,17 +7,17 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities;
 /// <summary>
 /// Represents a product item within a sale.
 /// </summary>
-public class SaleItem : BaseEntity
+public class SaleItem
 {
-    public Guid ProductId { get;  private set; } = Guid.Empty;
+    public Guid ProductId { get;  set; } = Guid.Empty;
 
-    public string ProductName { get; private set; }
+    public string ProductName { get; set; }
 
-    public int Quantity { get; private set; }
+    public int Quantity { get; set; }
 
-    public decimal UnitPrice { get; private set; }
+    public decimal UnitPrice { get;  set; }
 
-    public bool IsCancelled { get; private set; }
+    public bool IsCancelled { get;  set; }
 
     public decimal GrossTotal => UnitPrice * Quantity;
 
@@ -25,16 +25,7 @@ public class SaleItem : BaseEntity
 
     public decimal TotalItemAmount => GrossTotal - Discount;
 
-    public SaleItem(Guid productId, string productName, int quantity, decimal unitPrice)
-    {
-        ProductId = productId;
-        ProductName = productName;
-        Quantity = quantity;
-        UnitPrice = unitPrice;
-
-        Validate();
-    }
-
+    public SaleItem() { }
 
     public ValidationResultDetail Validate()
     {
@@ -49,12 +40,13 @@ public class SaleItem : BaseEntity
 
     private decimal CalculateDiscount()
     {
-        if (Quantity >= 10)
-            return UnitPrice * Quantity * 0.20m;
-
-        if (Quantity >= 4)
-            return UnitPrice * Quantity * 0.10m;
-
+        if (Quantity >= 10) return GrossTotal * 0.20m;
+        if (Quantity >= 4) return GrossTotal * 0.10m;
         return 0;
+    }
+
+    public void Cancel()
+    {
+        IsCancelled = true;
     }
 }

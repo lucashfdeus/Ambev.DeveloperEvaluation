@@ -43,7 +43,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
             RuleForEach(x => x.Items)
                 .SetValidator(new SaleItemValidator());
 
-            RuleFor(x => x.TotalAmount)
+            RuleFor(x => x.GrossTotalAmount)
                 .GreaterThan(0).WithMessage("Total must be greater than zero.");
         }
     }

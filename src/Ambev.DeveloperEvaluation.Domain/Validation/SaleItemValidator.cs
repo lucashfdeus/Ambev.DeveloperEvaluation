@@ -28,6 +28,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
             RuleFor(saleItem => saleItem)
                 .Must(item => item.Discount <= item.GrossTotal)
                 .WithMessage("Discount cannot be greater than the total value of the item.");
+
+            RuleFor(saleItem => saleItem)
+                .Must(item => item.Quantity >= 4 || item.Discount == 0)
+                .WithMessage("Discounts are only allowed for quantities of 4 or more.");
         }
     }
 }

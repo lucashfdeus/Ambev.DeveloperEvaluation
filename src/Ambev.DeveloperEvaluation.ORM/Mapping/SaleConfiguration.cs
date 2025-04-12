@@ -47,7 +47,9 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.Property(s => s.UpdatedAt)
                    .IsRequired();
 
-            builder.Ignore(s => s.TotalAmount);
+            builder.Ignore(s => s.NetTotalAmount);
+
+            builder.Ignore(s => s.GrossTotalAmount);
 
             builder.HasMany<SaleItem>("_items")
                    .WithOne()

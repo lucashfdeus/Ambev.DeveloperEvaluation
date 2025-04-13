@@ -32,6 +32,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
                 return BadRequest(validationResult.Errors);
 
             var command = _mapper.Map<CreateSaleCommand>(request);
+
             var response = await _mediator.Send(command, cancellationToken);
 
             return Created(string.Empty, new ApiResponseWithData<CreateSaleResponse>
@@ -41,7 +42,5 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
                 Data = _mapper.Map<CreateSaleResponse>(response)
             });
         }
-
-
     }
 }

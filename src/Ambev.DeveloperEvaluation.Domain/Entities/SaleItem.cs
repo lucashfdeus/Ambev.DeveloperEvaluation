@@ -7,7 +7,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities;
 /// <summary>
 /// Represents a product item within a sale.
 /// </summary>
-public class SaleItem
+public class SaleItem : BaseEntity
 {
     public Guid ProductId { get;  set; } = Guid.Empty;
 

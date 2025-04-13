@@ -55,6 +55,31 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             UpdatedAt = DateTime.UtcNow;
         }
 
+        public void AddItem(SaleItem item)
+        {
+            if (Status != SaleStatus.Created)
+                throw new DomainException("Can only add items to created sales.");
+
+            var totalQuantity = Items
+                .Where(i => i.ProductId == item.ProductId && !i.IsCancelled)
+                .Sum(i => i.Quantity) + item.Quantity;
+
+            if (totalQuantity > 20)
+                throw new DomainException("Maximum of 20 identical items per sale.");
+
+            Items.Add(item);
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public void CancelItem(Guid productId)
+        {
+            var item = Items.FirstOrDefault(i => i.ProductId == productId);
+            if (item == null || item.IsCancelled) return;
+
+            item.Cancel();
+            UpdatedAt = DateTime.UtcNow;
+        }
+
         public ValidationResultDetail Validate()
         {
             var validator = new SaleValidator();

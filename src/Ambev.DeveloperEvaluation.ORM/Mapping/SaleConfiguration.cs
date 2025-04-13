@@ -20,6 +20,12 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
                 .IsRequired()
                 .HasMaxLength(50);
 
+            builder.Property(s => s.GrossTotalAmount)
+                .HasColumnType("decimal(18,2)");
+
+            builder.Property(s => s.NetTotalAmount)
+                .HasColumnType("decimal(18,2)");
+
             builder.Property(s => s.SaleDate)
                 .IsRequired()
                 .HasColumnType("timestamp with time zone");
@@ -61,9 +67,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
                 .HasForeignKey("SaleId")
                 .IsRequired()
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Ignore(s => s.NetTotalAmount);
-            builder.Ignore(s => s.GrossTotalAmount);
 
             builder.Metadata
                 .FindNavigation(nameof(Sale.Items))!

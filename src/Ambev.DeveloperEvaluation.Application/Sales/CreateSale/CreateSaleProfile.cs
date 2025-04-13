@@ -1,4 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
@@ -6,13 +7,15 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
     /// Profile for mapping between CreateSale entity and CreateUserResponse
     /// </summary>
     /// 
-    public class CreateSaleProfile : AutoMapper.Profile
+    public class CreateSaleProfile : Profile
     {
         public CreateSaleProfile()
         {
+            CreateMap<Sale, CreateSaleCommand>();
             CreateMap<CreateSaleCommand.SaleItemCommand, SaleItem>();
-            CreateMap<CreateSaleCommand, Sale>();
+
             CreateMap<Sale, CreateSaleResult>();
+            CreateMap<SaleItem, SaleItemResult>();
         }
     }
 }

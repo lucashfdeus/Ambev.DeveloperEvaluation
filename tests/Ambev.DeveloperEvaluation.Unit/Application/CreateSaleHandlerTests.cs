@@ -40,24 +40,13 @@ namespace Ambev.DeveloperEvaluation.Unit.Application
             {
                 Id = Guid.NewGuid(),
                 SaleNumber = command.SaleNumber,
-                CustomerId = command.CustomerId,
-                CustomerName = command.CustomerName,
-                BranchId = command.BranchId,
-                BranchName = command.BranchName,
-                SaleDate = command.SaleDate,
-                Items = command.Items.Select(i => new SaleItem
-                {
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductName,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList(),
-                Status = SaleStatus.Created,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
             };
 
-            var expectedResult = new CreateSaleResult { Id = sale.Id };
+            var expectedResult = new CreateSaleResult
+            {
+                Id = sale.Id,
+                SaleNumber = sale.SaleNumber,
+            };
 
             _mapper.Map<Sale>(Arg.Is<CreateSaleCommand>(c => c.SaleNumber == command.SaleNumber)).Returns(sale);
             _mapper.Map<CreateSaleResult>(Arg.Is<Sale>(s => s.Id == sale.Id)).Returns(expectedResult);
@@ -115,37 +104,41 @@ namespace Ambev.DeveloperEvaluation.Unit.Application
         [Fact(DisplayName = "Given valid command When handling Then maps command to sale entity")]
         public async Task Handle_ValidRequest_MapsCommandToSale()
         {
-            // Given
+            // Arrange
             var command = CreateSaleHandlerTestData.GenerateValidCommand();
-            var sale = new Sale
+            var expectedSale = new Sale();
+
+            expectedSale.Id = Guid.NewGuid();
+            expectedSale.SaleNumber = command.SaleNumber;
+            expectedSale.CustomerId = command.CustomerId;
+            expectedSale.CustomerName = command.CustomerName;
+            expectedSale.BranchId = command.BranchId;
+            expectedSale.BranchName = command.BranchName;
+            expectedSale.SaleDate = command.SaleDate;
+            expectedSale.Status = SaleStatus.Created;
+            expectedSale.CreatedAt = DateTime.UtcNow;
+            expectedSale.UpdatedAt = DateTime.UtcNow;
+
+            foreach (var item in command.Items)
             {
-                Id = Guid.NewGuid(),
-                SaleNumber = command.SaleNumber,
-                CustomerId = command.CustomerId,
-                CustomerName = command.CustomerName,
-                BranchId = command.BranchId,
-                BranchName = command.BranchName,
-                SaleDate = command.SaleDate,
-                Items = command.Items.Select(i => new SaleItem
+                var saleItem = new SaleItem
                 {
-                    ProductId = i.ProductId,
-                    ProductName = i.ProductName,
-                    Quantity = i.Quantity,
-                    UnitPrice = i.UnitPrice
-                }).ToList(),
-                Status = SaleStatus.Created,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
+                    ProductId = item.ProductId,
+                    ProductName = item.ProductName,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice
+                };
+                expectedSale.AddItem(saleItem);
+            }
 
-            _mapper.Map<Sale>(command).Returns(sale);
+            _mapper.Map<Sale>(command).Returns(expectedSale);
             _saleRepository.CreateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>())
-                .Returns(sale);
+                .Returns(expectedSale);
 
-            // When
+            // Act
             await _handler.Handle(command, CancellationToken.None);
 
-            // Then
+            // Assert
             _mapper.Received(1).Map<Sale>(Arg.Is<CreateSaleCommand>(c =>
                 c.SaleNumber == command.SaleNumber &&
                 c.CustomerId == command.CustomerId &&
@@ -153,7 +146,12 @@ namespace Ambev.DeveloperEvaluation.Unit.Application
                 c.BranchId == command.BranchId &&
                 c.BranchName == command.BranchName &&
                 c.SaleDate == command.SaleDate &&
-                c.Items == command.Items));
+                c.Items.Count == command.Items.Count &&
+                c.Items.All(expectedItem => command.Items.Any(actualItem =>
+                    actualItem.ProductId == expectedItem.ProductId &&
+                    actualItem.ProductName == expectedItem.ProductName &&
+                    actualItem.Quantity == expectedItem.Quantity &&
+                    actualItem.UnitPrice == expectedItem.UnitPrice))));
         }
     }
 }

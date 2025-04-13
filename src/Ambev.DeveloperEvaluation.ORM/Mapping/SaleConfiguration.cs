@@ -11,55 +11,63 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.ToTable("Sales");
 
             builder.HasKey(s => s.Id);
-
-            builder.Property(s => s.Id).HasColumnType("uuid").HasDefaultValueSql("gen_random_uuid()");
+            builder.Property(s => s.Id)
+                .HasColumnType("uuid")
+                .HasDefaultValueSql("gen_random_uuid()")
+                .ValueGeneratedOnAdd();
 
             builder.Property(s => s.SaleNumber)
-                   .IsRequired()
-                   .HasMaxLength(50);
+                .IsRequired()
+                .HasMaxLength(50);
 
             builder.Property(s => s.SaleDate)
-                   .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamp with time zone");
+
 
             builder.Property(s => s.CustomerId)
-                   .IsRequired()
-                   .HasMaxLength(50);
+                .IsRequired()
+                .HasColumnType("uuid");
 
             builder.Property(s => s.CustomerName)
-                   .IsRequired()
-                   .HasMaxLength(200);
+                .IsRequired()
+                .HasMaxLength(200);
 
             builder.Property(s => s.BranchId)
-                   .IsRequired()
-                   .HasMaxLength(50);
+                .IsRequired()
+                .HasColumnType("uuid");
 
             builder.Property(s => s.BranchName)
-                   .IsRequired()
-                   .HasMaxLength(200);
+                .IsRequired()
+                .HasMaxLength(200);
 
             builder.Property(s => s.Status)
-                   .HasConversion<int>()
-                   .IsRequired();
+                .HasConversion<string>()
+                .IsRequired()
+                .HasMaxLength(20);
 
             builder.Property(s => s.CreatedAt)
-                   .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamp with time zone")
+                .HasDefaultValueSql("NOW()");
 
             builder.Property(s => s.UpdatedAt)
-                   .IsRequired();
+                .IsRequired()
+                .HasColumnType("timestamp with time zone")
+                .HasDefaultValueSql("NOW()");
+
+            builder.HasMany(s => s.Items)
+                .WithOne()
+                .HasForeignKey("SaleId")
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Ignore(s => s.NetTotalAmount);
-
             builder.Ignore(s => s.GrossTotalAmount);
 
-            builder.HasMany<SaleItem>("_items")
-                   .WithOne()
-                   .HasForeignKey("SaleId")
-                   .IsRequired()
-                   .OnDelete(DeleteBehavior.Cascade);
-
             builder.Metadata
-                   .FindNavigation(nameof(Sale.Items))!
-                   .SetPropertyAccessMode(PropertyAccessMode.Field);
+                .FindNavigation(nameof(Sale.Items))!
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
         }
     }
 }

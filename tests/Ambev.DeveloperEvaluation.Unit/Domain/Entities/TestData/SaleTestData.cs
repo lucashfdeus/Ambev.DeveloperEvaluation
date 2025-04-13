@@ -35,7 +35,11 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData
         public static Sale GenerateSaleWithItems(params SaleItem[] items)
         {
             var sale = SaleFaker.Generate();
-            sale.Items = new List<SaleItem>(items);
+            sale.Items.Clear();
+            foreach (var item in items)
+            {
+                sale.AddItem(item);
+            }
             return sale;
         }
 

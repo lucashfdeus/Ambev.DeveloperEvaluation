@@ -32,13 +32,6 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 
             var sale = _mapper.Map<Sale>(command);
 
-            sale.Status = SaleStatus.Created;
-
-            sale.CreatedAt = DateTime.UtcNow;
-
-            sale.UpdatedAt = sale.CreatedAt;
-
-
             foreach (var item in sale.Items)
             {
                 var validation = item.Validate();

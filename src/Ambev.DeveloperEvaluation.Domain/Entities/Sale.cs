@@ -15,7 +15,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public DateTime SaleDate { get; set; }
 
-        public Guid CustomerId { get;  set; } = Guid.Empty;
+        public Guid CustomerId { get; set; } = Guid.Empty;
 
         public string CustomerName { get; set; } = string.Empty;
 
@@ -23,19 +23,36 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public string BranchName { get; set; } = string.Empty;
 
-        public List<SaleItem> Items { get; set; } = [];
+        public List<SaleItem> Items { get; private set; } = new();
 
-        public decimal NetTotalAmount => Items?.Where(i => !i.IsCancelled).Sum(i => i.TotalItemAmount) ?? 0;
+        private decimal _grossTotalAmount;
+        public decimal GrossTotalAmount
+        {
+            get => _grossTotalAmount;
+            private set => _grossTotalAmount = value;
+        }
 
-        public decimal GrossTotalAmount => Items?.Sum(i => i.GrossTotal) ?? 0;
+        private decimal _netTotalAmount;
+        public decimal NetTotalAmount
+        {
+            get => _netTotalAmount;
+            private set => _netTotalAmount = value;
+        }
 
-        public SaleStatus Status { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public SaleStatus Status { get; set; } = SaleStatus.Created;
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public Sale() { }
+
+        public Sale(List<SaleItem> items)
+        {
+            Items = items;
+            RecalculateTotals();
+        }
 
         public void Cancel()
         {
@@ -57,17 +74,12 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public void AddItem(SaleItem item)
         {
-            if (Status != SaleStatus.Created)
-                throw new DomainException("Can only add items to created sales.");
-
             var totalQuantity = Items
                 .Where(i => i.ProductId == item.ProductId && !i.IsCancelled)
                 .Sum(i => i.Quantity) + item.Quantity;
 
-            if (totalQuantity > 20)
-                throw new DomainException("Maximum of 20 identical items per sale.");
-
             Items.Add(item);
+            RecalculateTotals();
             UpdatedAt = DateTime.UtcNow;
         }
 
@@ -78,6 +90,12 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
             item.Cancel();
             UpdatedAt = DateTime.UtcNow;
+        }
+
+        private void RecalculateTotals()
+        {
+            GrossTotalAmount = Items.Sum(i => i.GrossTotal);
+            NetTotalAmount = Items.Where(i => !i.IsCancelled).Sum(i => i.NetTotal);
         }
 
         public ValidationResultDetail Validate()

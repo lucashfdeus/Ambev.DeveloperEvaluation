@@ -1,8 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Bogus;
-using System;
-using System.Collections.Generic;
 
 namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData
 {
@@ -18,7 +16,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData
             .RuleFor(s => s.BranchId, f => Guid.NewGuid())
             .RuleFor(s => s.BranchName, f => f.Company.CompanyName())
             .RuleFor(s => s.Items, f => GenerateValidSaleItems(f))
-            .RuleFor(s => s.Status, f => f.PickRandom<SaleStatus>())
+            .RuleFor(s => s.Status, SaleStatus.Created)
             .RuleFor(s => s.CreatedAt, f => f.Date.Past(1))
             .RuleFor(s => s.UpdatedAt, (f, s) => f.Date.Between(s.CreatedAt, DateTime.UtcNow));
 
@@ -28,9 +26,68 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData
                 .CustomInstantiator(fi => new SaleItem())
                 .RuleFor(si => si.ProductId, fi => Guid.NewGuid())
                 .RuleFor(si => si.ProductName, fi => f.Commerce.ProductName())
-                .RuleFor(si => si.Quantity, fi => f.Random.Int(1, 10))
+                .RuleFor(si => si.Quantity, fi => f.Random.Int(1, 3))
                 .RuleFor(si => si.UnitPrice, fi => f.Finance.Amount(1, 100, 2))
+                .RuleFor(si => si.IsCancelled, false)
                 .Generate(f.Random.Int(1, 5));
+        }
+
+        public static Sale GenerateSaleWithItems(params SaleItem[] items)
+        {
+            var sale = SaleFaker.Generate();
+            sale.Items = new List<SaleItem>(items);
+            return sale;
+        }
+
+        public static Sale GenerateSaleWithItemQuantities(params int[] quantities)
+        {
+            var items = new List<SaleItem>();
+            foreach (var qty in quantities)
+            {
+                items.Add(new SaleItem
+                {
+                    ProductId = Guid.NewGuid(),
+                    Quantity = qty,
+                    UnitPrice = 10m,
+                    IsCancelled = false
+                });
+            }
+            return GenerateSaleWithItems(items.ToArray());
+        }
+
+        public static Sale GenerateSaleWithDuplicateProducts(int productCount)
+        {
+            var productId = Guid.NewGuid();
+            var items = new Faker<SaleItem>()
+                .CustomInstantiator(fi => new SaleItem())
+                .RuleFor(si => si.ProductId, productId)
+                .RuleFor(si => si.Quantity, 1)
+                .RuleFor(si => si.UnitPrice, 10m)
+                .Generate(productCount);
+
+            return GenerateSaleWithItems(items.ToArray());
+        }
+
+        public static SaleItem GenerateSaleItemForDiscountTest(int quantity)
+        {
+            return new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                ProductName = "Test Product",
+                Quantity = quantity,
+                UnitPrice = 100m,
+                IsCancelled = false
+            };
+        }
+
+        public static Sale GenerateSaleWithCancelledItems(int cancelledCount)
+        {
+            var sale = SaleFaker.Generate();
+            for (int i = 0; i < cancelledCount && i < sale.Items.Count; i++)
+            {
+                sale.Items[i].IsCancelled = true;
+            }
+            return sale;
         }
 
         public static Sale GenerateValidSale()

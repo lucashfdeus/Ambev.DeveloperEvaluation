@@ -38,6 +38,18 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 
             sale.UpdatedAt = sale.CreatedAt;
 
+
+            foreach (var item in sale.Items)
+            {
+                var validation = item.Validate();
+                if (!validation.IsValid)
+                {
+                    throw new ValidationException(
+                        validation.Errors.Select(e =>
+                            new FluentValidation.Results.ValidationFailure("", e.Detail)));
+                }
+            }
+
             var createdSale = await _saleRepository.CreateAsync(sale, cancellationToken);
 
             if(createdSale.Status == SaleStatus.Created)

@@ -89,6 +89,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             if (item == null || item.IsCancelled) return;
 
             item.Cancel();
+            RecalculateTotals();
             UpdatedAt = DateTime.UtcNow;
         }
 

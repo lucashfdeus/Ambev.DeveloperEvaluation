@@ -29,7 +29,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Validation
                     discount <= item.GrossTotal * 0.20m)
                 .WithMessage("Discount exceeds allowed limit for this quantity (0% <4 items, 10% 4-9 items, 20% 10+ items).");
 
-            RuleFor(x => x.TotalItemAmount)
+            RuleFor(x => x.GrossTotal)
                 .GreaterThanOrEqualTo(0).WithMessage("Total amount cannot be negative.");
         }
     }

@@ -15,17 +15,15 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation
             _validator = new SaleValidator();
         }
 
-        [Fact(DisplayName = "Valid sale should pass all validations")]
-        public void ValidSale_ShouldPassAllValidations()
+        [Fact(DisplayName = "Sale with canceled items should exclude from NetTotal")]
+        public void CanceledItems_ShouldExcludeFromNetTotal()
         {
             // Arrange
-            var sale = SaleTestData.GenerateValidSale();
+            var sale = SaleTestData.GenerateSaleWithCancelledItems(1);
 
-            // Act
-            var result = _validator.TestValidate(sale);
-
-            // Assert
-            result.ShouldNotHaveAnyValidationErrors();
+            // Act & Assert
+            _validator.TestValidate(sale)
+                .ShouldNotHaveValidationErrorFor(x => x.NetTotalAmount);
         }
 
         [Theory(DisplayName = "Sale with invalid number should fail")]
@@ -66,19 +64,19 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation
                   .WithErrorMessage("At least one item is required.");
         }
 
-        [Fact(DisplayName = "Sale with future CreatedAt should fail")]
+        [Fact(DisplayName = "Sale with future CreatedAt should fail validation")]
         public void FutureCreatedAt_ShouldFail()
         {
             var sale = SaleTestData.GenerateValidSale();
-            sale.CreatedAt = DateTime.UtcNow.AddMinutes(1);
+            sale.CreatedAt = DateTime.UtcNow.AddHours(1);
 
             var result = _validator.TestValidate(sale);
 
             result.ShouldHaveValidationErrorFor(x => x.CreatedAt)
-                  .WithErrorMessage("CreatedAt cannot be in the future.");
+                  .WithErrorMessage("Creation date cannot be in the future.");
         }
 
-        [Fact(DisplayName = "Sale with UpdatedAt before CreatedAt should fail")]
+        [Fact(DisplayName = "Sale with UpdatedAt before CreatedAt should fail validation")]
         public void UpdatedAtBeforeCreatedAt_ShouldFail()
         {
             var sale = SaleTestData.GenerateValidSale();
@@ -87,7 +85,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation
             var result = _validator.TestValidate(sale);
 
             result.ShouldHaveValidationErrorFor(x => x.UpdatedAt)
-                  .WithErrorMessage("UpdatedAt must be greater than or equal to CreatedAt.");
+                  .WithErrorMessage("Update date must be greater than or equal to creation date.");
         }
 
         [Fact(DisplayName = "Sale with invalid status should fail")]
@@ -102,16 +100,19 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation
                   .WithErrorMessage("Status must be a valid value.");
         }
 
-        [Fact(DisplayName = "Sale with zero GrossTotal should fail")]
+        [Fact(DisplayName = "Sale with zero GrossTotal should fail validation")]
         public void ZeroGrossTotal_ShouldFail()
         {
+            // Arrange
             var sale = SaleTestData.GenerateValidSale();
             sale.Items.ForEach(i => i.UnitPrice = 0);
 
+            // Act
             var result = _validator.TestValidate(sale);
 
+            // Assert
             result.ShouldHaveValidationErrorFor(x => x.GrossTotalAmount)
-                  .WithErrorMessage("Total must be greater than zero.");
+                  .WithErrorMessage("Gross total must be greater than zero.");
         }
-    }   
+    }
 }

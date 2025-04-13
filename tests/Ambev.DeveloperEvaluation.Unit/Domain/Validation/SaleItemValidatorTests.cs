@@ -1,6 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
+using Bogus;
 using FluentValidation.TestHelper;
 using Xunit;
 
@@ -48,27 +49,44 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Validation
                   .WithErrorMessage("ProductId must not be empty.");
         }
 
-        [Theory(DisplayName = "Item with invalid quantity should fail")]
-        [InlineData(0)]
-        [InlineData(-1)]
-        [InlineData(21)]
-        public void InvalidQuantity_ShouldFail(int quantity)
+        [Theory(DisplayName = "Item quantity validation should fail for invalid values")]
+        [InlineData(0, "Quantity must be at least 1.")]
+        [InlineData(-1, "Quantity must be at least 1.")]
+        [InlineData(21, "Maximum quantity per item is 20.")]
+        [InlineData(100, "Maximum quantity per item is 20.")]
+        public void InvalidQuantity_ShouldFail(int quantity, string expectedErrorMessage)
         {
+            // Arrange
             var item = SaleTestData.GenerateValidSaleItem();
             item.Quantity = quantity;
 
+            // Act
             var result = _validator.TestValidate(item);
 
-            if (quantity <= 0)
-            {
-                result.ShouldHaveValidationErrorFor(x => x.Quantity)
-                      .WithErrorMessage("Quantity must be at least 1.");
-            }
-            else
-            {
-                result.ShouldHaveValidationErrorFor(x => x.Quantity)
-                      .WithErrorMessage("Maximum quantity is 20.");
-            }
+            // Assert
+            result.ShouldHaveValidationErrorFor(x => x.Quantity)
+                  .WithErrorMessage(expectedErrorMessage);
+        }
+
+        [Theory(DisplayName = "Item quantity validation should pass for valid values")]
+        [InlineData(1)]
+        [InlineData(10)]
+        [InlineData(20)]
+        public void ValidQuantity_ShouldPass(int quantity)
+        {
+            // Arrange
+            var item = new Faker<SaleItem>()
+                .CustomInstantiator(f => new SaleItem())
+                .RuleFor(si => si.ProductId, f => Guid.NewGuid())
+                .RuleFor(si => si.Quantity, quantity)
+                .RuleFor(si => si.UnitPrice, f => f.Finance.Amount(1, 100, 2))
+                .Generate();
+
+            // Act
+            var result = _validator.TestValidate(item);
+
+            // Assert
+            result.ShouldNotHaveValidationErrorFor(x => x.Quantity);
         }
     }
 }

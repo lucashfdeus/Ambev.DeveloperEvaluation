@@ -26,27 +26,52 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications
             Assert.True(sale.SaleDate <= DateTime.UtcNow);
         }
 
-        [Fact]
+        [Fact(DisplayName = "Sale With Canceled Items Should Exclude Them From NetTotal")]
         public void Sale_With_Canceled_Items_Should_Exclude_Them_From_Total()
         {
             // Arrange
-            var sale = SaleSpecificationTestData.GenerateSaleWithCanceledItems(2);
+            var sale = new Sale();
 
-            while (sale.Items.Count < 3)
+            var canceledItem1 = new SaleItem
             {
-                sale.Items.Add(new SaleItem { IsCancelled = false });
-            }
+                ProductId = Guid.NewGuid(),
+                Quantity = 2,
+                UnitPrice = 50m
+            };
+            canceledItem1.Cancel();
+            sale.AddItem(canceledItem1);
 
-            var activeItems = sale.Items.Where(i => !i.IsCancelled).ToList();
-            var expectedTotal = activeItems.Sum(i => i.TotalItemAmount);
+            var canceledItem2 = new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = 3,
+                UnitPrice = 30m
+            };
+            canceledItem2.Cancel();
+            sale.AddItem(canceledItem2);
 
-            // Act
-            var actualTotal = sale.NetTotalAmount;
+            var activeItem1 = new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = 1,
+                UnitPrice = 20.15m
+            };
+            sale.AddItem(activeItem1);
 
-            // Assert
-            Assert.Equal(expectedTotal, actualTotal);
-            Assert.True(sale.Items.Count(i => i.IsCancelled) >= 2);
-            Assert.True(activeItems.Count >= 1);
+            var activeItem2 = new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = 4,
+                UnitPrice = 10m
+            };
+            sale.AddItem(activeItem2);
+
+            var expectedTotal = sale.Items.Where(i => !i.IsCancelled).Sum(i => i.NetTotal);
+
+            // Act & Assert
+            Assert.Equal(expectedTotal, sale.NetTotalAmount);
+            Assert.Equal(2, sale.Items.Count(i => i.IsCancelled));
+            Assert.True(sale.Items.Count(i => !i.IsCancelled) >= 1);
         }
 
         [Fact]
@@ -58,14 +83,32 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications
             Assert.Equal(0, sale.NetTotalAmount);
         }
 
-        [Fact]
-        public void NetTotalAmount_With_No_Canceled_Items_Should_Return_Full_Total()
+        [Fact(DisplayName = "NetTotalAmount Should Exclude Canceled Items")]
+        public void NetTotalAmount_Should_Exclude_Canceled_Items()
         {
-            var sale = SaleSpecificationTestData.GenerateSale(SaleStatus.Created);
-            sale.Items.ForEach(i => i.IsCancelled = false);
+            var sale = new Sale();
 
-            var expectedTotal = sale.Items.Sum(i => i.TotalItemAmount);
-            Assert.Equal(expectedTotal, sale.NetTotalAmount);
+            // Item ativo
+            sale.AddItem(new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = 1,
+                UnitPrice = 20.15m,
+                IsCancelled = false
+            });
+
+            var canceledItem = new SaleItem
+            {
+                ProductId = Guid.NewGuid(),
+                Quantity = 2,
+                UnitPrice = 50m
+            };
+
+            canceledItem.Cancel();
+            sale.AddItem(canceledItem);
+
+            // Act & Assert
+            Assert.Equal(20.15m, sale.NetTotalAmount);
         }
     }
 }

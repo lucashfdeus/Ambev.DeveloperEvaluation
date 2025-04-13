@@ -20,6 +20,19 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications.TestData
         .RuleFor(s => s.CreatedAt, f => f.Date.Past(1))
         .RuleFor(s => s.UpdatedAt, (f, s) => f.Date.Between(s.CreatedAt, DateTime.UtcNow));
 
+        private static readonly Faker<Sale> ValidSaleFaker = new Faker<Sale>()
+        .CustomInstantiator(f => new Sale())
+        .RuleFor(s => s.Items, f => new Faker<SaleItem>()
+        .CustomInstantiator(fi => new SaleItem())
+        .RuleFor(si => si.Quantity, 1)
+        .RuleFor(si => si.UnitPrice, f.Finance.Amount(0.01m, 100, 2))
+        .Generate(f.Random.Int(1, 3)));
+
+        public static Sale GenerateGuaranteedValidSale()
+        {
+            return ValidSaleFaker.Generate();
+        }
+
         private static List<SaleItem> GenerateSaleItems(Faker f)
         {
             return new Faker<SaleItem>()
@@ -39,18 +52,10 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications.TestData
             return sale;
         }
 
-        public static Sale GenerateSaleWithItemCount(int itemCount)
-        {
-            return saleFaker
-                .RuleFor(s => s.Items, f => GenerateSaleItems(f).Take(itemCount).ToList())
-                .Generate();
-        }
-
         public static Sale GenerateSaleWithCanceledItems(int canceledItemCount)
         {
             var sale = saleFaker.Generate();
 
-            // Garante que teremos itens suficientes
             while (sale.Items.Count < canceledItemCount)
             {
                 sale.Items.Add(GenerateValidSaleItem());
@@ -58,18 +63,6 @@ namespace Ambev.DeveloperEvaluation.Unit.Domain.Specifications.TestData
 
             sale.Items.Take(canceledItemCount).ToList().ForEach(item => item.Cancel());
             return sale;
-        }
-
-        public static Sale GenerateSaleWithUniformQuantity(int quantity)
-        {
-            return saleFaker
-                .RuleFor(s => s.Items, f =>
-                {
-                    var items = GenerateSaleItems(f);
-                    items.ForEach(i => i.Quantity = quantity);
-                    return items;
-                })
-                .Generate();
         }
 
         private static SaleItem GenerateValidSaleItem()

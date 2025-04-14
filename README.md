@@ -62,12 +62,6 @@ pause
    - Database: `developer_evaluation`
    - Usuário: `developer`
    - Senha: `ev@luAt10n`
-3. 🌐 Configura a WebAPI para rodar nas portas 8080 (HTTP) e 8081 (HTTPS)
-4. 📊 Pronto para usar! O sistema estará disponível em:
-   ```
-   http://localhost:8080/swagger
-   ```
-
 ## ⚠️ Possíveis Problemas e Soluções
 
 1. **Erro "Arquivo não encontrado"**:

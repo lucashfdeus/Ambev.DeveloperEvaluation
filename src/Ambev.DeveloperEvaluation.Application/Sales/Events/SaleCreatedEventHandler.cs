@@ -7,8 +7,10 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Events
     {
         public Task Handle(SaleCreatedEvent notification, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"[Evento] Venda criada: {notification.SaleId}, Cliente: {notification.CustomerId}");
-
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine($"[Event] SaleCreated: {notification.SaleId}, Client: {notification.CustomerId}");
+            Console.ForegroundColor = previousColor;
             return Task.CompletedTask;
         }
     }

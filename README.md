@@ -6,120 +6,75 @@ O projeto **Developer Evaluation** é uma aplicação WebAPI para gerenciamento 
 ---
 
 ## 📋 Pré-requisitos
-- 🐳 Docker instalado
-- ⚙️ .NET SDK (versão compatível com o projeto)
-- 🐘 PostgreSQL client (opcional para inspeção direta do banco)
+- 🐳 Docker instalado e rodando
+- ⚙️ .NET SDK 6.0 ou superior
+- 🐘 PostgreSQL client (opcional para debug avançado)
+- 🧰 Visual Studio 2022 ou VS Code (recomendado)
 
 ---
 
 ## 🛠️ Configuração do Ambiente
 
 ### 1. Banco de Dados
-🔹 Utilizaremos **apenas PostgreSQL**  
-🔹 Os outros serviços (MongoDB e Redis) estão definidos no docker-compose mas não serão utilizados
+🔹 **PostgreSQL** como banco principal  
+🔹 Configuração automática via Docker Compose
 
 ### 2. Inicialização dos Containers
-# 🐳 Executando o Projeto com Docker
+## 🐳 Executando o Projeto com Docker
 
-Aqui está o guia para iniciar o projeto usando o arquivo de script:
-
-## 🖱️ Passo a Passo para Execução
-
-1. **Localize a Solution** no Explorador de Soluções do Visual Studio
-
-2. **Clique com o botão direito** do mouse em cima da solution (não em um projeto específico)
-
-3. **Selecione "Abrir Terminal"** ou "Abrir no Explorador de Arquivos"
-
-4. No terminal ou explorador, **digite o comando**:
+### 🖱️ Passo a Passo Simplificado
+1. **Abra o terminal** na raiz do projeto
+2. **Execute o script**:
    ```cmd
    .\script-docker-compose-database.bat
    ```
-5. **Aguarde a execução** - você verá o progresso no terminal
-6. ## 📂 Arquivo `script-docker-compose-database.bat`
+3. **Aguarde** a mensagem de confirmação
+
+### 📜 Conteúdo do Script
 ```batch
 @echo off
 echo ******************************************
-echo * Iniciando containers Docker...         *
+echo * 🐋 Iniciando containers Docker...      *
 echo ******************************************
 
 docker-compose -f docker-compose.database.yml up -d
 
 echo ******************************************
-echo * Containers iniciados com sucesso!      *
+echo * ✅ Containers iniciados com sucesso!    *
 echo *                                        *
-echo * WebAPI: http://localhost:8080/swagger  *
-echo * PostgreSQL porta: 5432                 *
+echo * 🌐 WebAPI: http://localhost:8080/swagger
+echo * 🐘 PostgreSQL porta: 5432             *
 echo ******************************************
-
 pause
 ```
 
-## ✅ O que acontece quando executa o script
-
-1. 🔄 Inicia os containers Docker em modo detached (-d)
-2. 🐘 Cria o container do PostgreSQL com as configurações:
-   - Database: `developer_evaluation`
-   - Usuário: `developer`
-   - Senha: `ev@luAt10n`
-## ⚠️ Possíveis Problemas e Soluções
-
-1. **Erro "Arquivo não encontrado"**:
-   - Verifique se o script está na raiz da solution
-   - Confira se você está executando do diretório correto
-
-2. **Erros de permissão**:
-   - Execute o terminal/PowerShell como administrador
-   - Verifique se o Docker Desktop está rodando
-
-3. **Portas em uso**:
-   ```cmd
-   netstat -ano | findstr :8080
-   netstat -ano | findstr :5432
-   ```
-   - Se estiverem em uso, altere no docker-compose.yml
-
-## 🔍 Verificando os Containers
-Após executar, verifique se tudo está OK com:
+### 🔍 Verificação Pós-Instalação
 ```cmd
 docker ps
 ```
-
-Você deverá ver o container:
+Deve mostrar:
 - `ambev_developer_evaluation_database`
-
-Pronto! Seu ambiente está configurado e pronto para desenvolvimento 🎉
-
-🔄 Isso irá iniciar:
-- 💾 Banco de dados PostgreSQL (na porta 5432)
----
-
+  
 ## 🏗️ Gerenciamento de Migrations
-
-### 📌 Criar uma nova Migration
-```bash
-Add-Migration [NOME_DA_MIGRATION] -Context DefaultContext -Project Ambev.DeveloperEvaluation.ORM -StartupProject Ambev.DeveloperEvaluation.WebApi -OutputDir "Migrations"
+### Package Manager Console
+```powershell
+Update-Database -Context DefaultContext
 ```
-
-💡 Exemplo:
+### Terminal .NET CLI
 ```bash
-Add-Migration _13042025SaleInicial -Context DefaultContext -Project Ambev.DeveloperEvaluation.ORM -StartupProject Ambev.DeveloperEvaluation.WebApi -OutputDir "Migrations"
+dotnet ef database update --context DefaultContext
 ```
-
-### ⬆️ Aplicar Migrations ao Banco de Dados
-```bash
-Update-Database -Migration [NOME_DA_MIGRATION] -Context DefaultContext
-```
-
-💡 Exemplo:
-```bash
-Update-Database -Migration _13042025SaleInicial -Context DefaultContext
-```
-
 ---
-
-## 📨 Exemplos de Requests
-
+## 🐞 Iniciando em Modo Debug
+1. **Abra a solution** no Visual Studio
+2. **Selecione o perfil** `Ambev.DeveloperEvaluation.WebApi - HTTPS`
+3. **Pressione F5** ou clique no botão ▶️
+4. **Acesse** o Swagger em:
+   ```
+   https://localhost:[PORT]/swagger
+   ```
+> 💡 Dica: Configure breakpoints antes de iniciar para debug eficiente
+---
 ### 1. 🛒 Venda Válida Básica (Sem Desconto)
 ```json
 {

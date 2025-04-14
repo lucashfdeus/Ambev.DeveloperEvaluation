@@ -1,7 +1,7 @@
 # 🚀 Documentação do Projeto Developer Evaluation
 
 ## 🌟 Visão Geral
-O projeto **Ambev.DeveloperEvaluation** é uma aplicação WebAPI para gerenciamento de vendas com regras de desconto baseadas na quantidade de itens vendidos.
+O projeto **Developer Evaluation** é uma aplicação WebAPI para gerenciamento de vendas com regras de desconto baseadas na quantidade de itens vendidos.
 
 ---
 

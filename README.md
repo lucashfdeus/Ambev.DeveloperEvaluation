@@ -200,9 +200,8 @@ dotnet ef database update --context DefaultContext
 
 ## 🔌 Endpoints da API
 - `📤 POST /api/sales` - Criar uma nova venda
-- `📥 GET /api/sales` - Listar todas as vendas
 - `🔍 GET /api/sales/{id}` - Obter detalhes de uma venda específica
-
+- `📥 DELETE /api/sales/{id}` - Deletar uma venda específica
 ---
 
 ## 📊 Regras de Negócio

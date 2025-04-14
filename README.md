@@ -91,9 +91,7 @@ Você deverá ver o container:
 Pronto! Seu ambiente está configurado e pronto para desenvolvimento 🎉
 
 🔄 Isso irá iniciar:
-- 🌐 WebAPI da aplicação (na porta 8080/8081)
 - 💾 Banco de dados PostgreSQL (na porta 5432)
-
 ---
 
 ## 🏗️ Gerenciamento de Migrations

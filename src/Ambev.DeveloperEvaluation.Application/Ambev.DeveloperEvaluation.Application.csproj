@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <Folder Include="Sales\DeleteSale\" />
-    <Folder Include="Sales\GetSale\" />
   </ItemGroup>
 
 </Project>

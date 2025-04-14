@@ -9,6 +9,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
     /// </summary>
     public class SaleItem : BaseEntity
     {
+        public Guid SaleId { get; set; }  //EF Core
+        public Sale Sale { get; set; }    // Propriedade de navegação
+
         public Guid ProductId { get; set; } = Guid.Empty;
         public string ProductName { get; set; } = string.Empty;
         public bool IsCancelled { get; set; }
@@ -37,7 +40,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public decimal GrossTotal { get; set; }
         public decimal Discount { get; set; }
-        public decimal NetTotal { get; set; }
+        public decimal NetTotal { get; set; }     
 
         public SaleItem() { }
 

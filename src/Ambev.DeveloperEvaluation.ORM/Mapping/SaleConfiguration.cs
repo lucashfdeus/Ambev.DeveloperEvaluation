@@ -11,6 +11,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.ToTable("Sales");
 
             builder.HasKey(s => s.Id);
+
             builder.Property(s => s.Id)
                 .HasColumnType("uuid")
                 .HasDefaultValueSql("gen_random_uuid()")
@@ -29,7 +30,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
             builder.Property(s => s.SaleDate)
                 .IsRequired()
                 .HasColumnType("timestamp with time zone");
-
 
             builder.Property(s => s.CustomerId)
                 .IsRequired()
@@ -62,10 +62,10 @@ namespace Ambev.DeveloperEvaluation.ORM.Mapping
                 .HasColumnType("timestamp with time zone")
                 .HasDefaultValueSql("NOW()");
 
+
             builder.HasMany(s => s.Items)
-                .WithOne()
-                .HasForeignKey("SaleId")
-                .IsRequired()
+                .WithOne(i => i.Sale)
+                .HasForeignKey(i => i.SaleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Metadata

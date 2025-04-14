@@ -6,7 +6,7 @@ O projeto **Developer Evaluation** é uma aplicação WebAPI para gerenciamento 
 ---
 
 ## 📋 Pré-requisitos
-- 🐳 Docker instalados
+- 🐳 Docker instalado
 - ⚙️ .NET SDK (versão compatível com o projeto)
 - 🐘 PostgreSQL client (opcional para inspeção direta do banco)
 

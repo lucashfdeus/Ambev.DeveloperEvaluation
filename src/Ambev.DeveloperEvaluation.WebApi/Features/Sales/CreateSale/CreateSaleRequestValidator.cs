@@ -1,7 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
-using Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
-using FluentValidation;
-using static Ambev.DeveloperEvaluation.Application.Sales.CreateSale.CreateSaleCommand;
+﻿using FluentValidation;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
 {
